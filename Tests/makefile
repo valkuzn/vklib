@@ -1,0 +1,12 @@
+CC=g++
+CFLAGS=-std=c++14
+LDFLAGS=
+SOURCES=*.cpp
+HEADERS=../*.h
+OBJECTS=$(SOURCES:.cpp=.o)
+EXECUTABLE=Test
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(SOURCES) $(HEADERS)
+	$(CC) $(CFLAGS) $(SOURCES) -o $@
