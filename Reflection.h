@@ -248,9 +248,15 @@ public:
     }
 
     template<class T>
-    static __inline constexpr uint32_t GetFieldCount(const T& obj)
+    static inline constexpr uint32_t GetFieldCount(const T& obj)
     {
         return GetFieldCount<T>();
+    }
+
+    template<const int fieldId, class ObjectT, class FieldT>
+    static inline void SetFieldValue(ObjectT& obj, FieldT&& fieldValue)
+    {
+        GetFieldValue<fieldId>(obj) = std::forward<FieldT>(fieldValue);
     }
 
     //
@@ -315,21 +321,21 @@ public:
 
 
 template<class ReflectableClass>
-__inline typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
+typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
     operator==(const ReflectableClass& obj1, const ReflectableClass& obj2)
 {
     return Reflection::Equal(obj1, obj2);
 }
 
 template<class ReflectableClass>
-__inline typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
+typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
     operator!=(const ReflectableClass& obj1, const ReflectableClass& obj2)
 {
     return !Reflection::Equal(obj1, obj2);
 }
 
 template<class ReflectableClass>
-__inline typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
+typename std::enable_if_t<Reflection::IsReflectable<ReflectableClass>(), bool>
     operator<(const ReflectableClass& obj1, const ReflectableClass& obj2)
 {
     return !Reflection::Less(obj1, obj2);

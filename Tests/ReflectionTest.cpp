@@ -1,74 +1,38 @@
 
 #include "../Reflection.h"
+#include "../ToString.h"
 #include <iostream>
 #include <cassert>
 
 using namespace vklib;
 
-template<class StreamT>
-class ReflectionFieldWriterVisitor
-{
-    StreamT& _stream;
-
-    template<class T>
-	bool VisitField(const char* fieldName, const T& value, std::true_type)
-	{
-		_stream << fieldName << "={";
-		Reflection::VisitFields(value, *this);
-		_stream << "} ";
-		return true;
-	}
-
-	template<class T>
-	bool VisitField(const char* fieldName, const T& value, std::false_type)
-	{
-		_stream << fieldName << "=" << value << " ";
-		return true;
-	}
-
-public:
-    ReflectionFieldWriterVisitor(StreamT& stream) : _stream(stream) {}
-
-	template<class T>
-	bool VisitField(const char* fieldName, const T& value)
-	{
-		return VisitField(fieldName, value, typename std::integral_constant<bool, Reflection::IsReflectable<T>()>());
-	}
-};
-
 class ReflectableClass1
 {
-public:
-	int intField = 3;
-	std::string stringField = "StringFieldTest";
-	bool boolField = true;
+    int intField = 3;
+    std::string stringField = "StringFieldTest";
+    bool boolField = true;
 
-	REFLECTABLE_FIELDS(intField, stringField, boolField);
+    REFLECTABLE_FIELDS(intField, stringField, boolField);
 };
 
 class ReflectableClass2
 {
-public:
-	const ReflectableClass1 classField;
+    std::unique_ptr<ReflectableClass1> classField { new ReflectableClass1() };
     double doubleField = 3423.532;
+    std::tuple<char, int> tupleField {'c', 6786 };
+    std::unordered_map<int, double> unorderedMapField {{1, 1.1}, {2, 2.2}};
 
-	REFLECTABLE_FIELDS(classField, doubleField);
+    REFLECTABLE_FIELDS(classField, doubleField, tupleField, unorderedMapField);
 };
 
 void GeneralTest()
 {
     //  TODO: write some reasonable tests ;)
     ReflectableClass2 rc;
-    std::stringstream ss;
-
-    ReflectionFieldWriterVisitor<std::stringstream> writer(ss);
-    Reflection::VisitFields(rc, writer);
-
-    std::string expected = "classField={intField=3 stringField=StringFieldTest boolField=1 } doubleField=3423.53 ";
-    std::string actual = ss.str();
+    std::string expected = "{classField={intField=3,stringField=StringFieldTest,boolField=1},doubleField=3423.53,tupleField={c,6786},unorderedMapField=[{2,2.2},{1,1.1}]}";
+    std::string actual = ToString(rc);
+    std::cout << actual;
     assert(actual == expected);
-
-    std::cout << ss.str();
 }
 
 int main(int argc, char** argv)
